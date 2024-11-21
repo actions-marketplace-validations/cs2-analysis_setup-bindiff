@@ -28392,6 +28392,7 @@ const exec = __nccwpck_require__(5236);
 const io = __nccwpck_require__(4994);
 const tc = __nccwpck_require__(3472);
 const os = __nccwpck_require__(857);
+const fs = __nccwpck_require__(1943);
 const path = __nccwpck_require__(6928);
 const which = __nccwpck_require__(1189)
 
@@ -28556,6 +28557,7 @@ async function setup(installPath) {
   }
 
   // setup paths
+  await fs.writeFile(configPath, '{}');
   await exec.exec('bindiff_config_setup', [
     '--config', configPath,
     `directory=${installPath}`,

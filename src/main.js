@@ -3,6 +3,7 @@ const exec = require('@actions/exec');
 const io = require("@actions/io");
 const tc = require('@actions/tool-cache');
 const os = require('os');
+const fs = require('fs/promises');
 const path = require('path');
 const which = require('which')
 
@@ -167,6 +168,7 @@ async function setup(installPath) {
   }
 
   // setup paths
+  await fs.writeFile(configPath, '{}');
   await exec.exec('bindiff_config_setup', [
     '--config', configPath,
     `directory=${installPath}`,
