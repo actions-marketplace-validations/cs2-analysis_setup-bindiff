@@ -1,0 +1,51 @@
+name: 'setup BinDiff test'
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  bindiff-test-matrix:
+    name: BinDiff local run on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            download-link: IDA_DOWNLOAD_LINK_LINUX
+            overlay-links: IDA_OVERLAY_LINKS_LINUX
+            install-command: IDA_INSTALL_COMMAND_LINUX
+          - os: windows-latest
+            download-link: IDA_DOWNLOAD_LINK_WINDOWS
+            overlay-links: IDA_OVERLAY_LINKS_WINDOWS
+            install-command: IDA_INSTALL_COMMAND_WINDOWS
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup IDA Pro
+      uses: cs2-analysis/setup-ida-pro@v1
+      with:
+        download-link: '${{ secrets[matrix.download-link] }}'
+        overlay-links: '${{ secrets[matrix.overlay-links] }}'
+        install-command: '${{ secrets[matrix.install-command] }}'
+    
+    - name: Setup BinDiff
+      uses: ./
+
+    - name: Test IDA Pro, BinExport, and BinDiff
+      run: |
+        cp -v $(which gzip) ./
+        idat -B gzip
+        idat -A -OBinExportAutoAction:BinExportBinary -OBinExportModule:gzip.BinExport gzip.i64
+        bindiff --version
+        ls -l gzip{,.i64,.asm,.BinExport}
