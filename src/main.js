@@ -20,9 +20,13 @@ function getPlatform() {
   }
 }
 
+function getZipName(osPlatform) {
+  return `BinDiff-${osPlatform}`;
+}
+
 function getUrl(version, osPlatform) {
   const versionPart = version === 'latest' ? 'latest/download' : `download/${version}`;
-  return `${BASE_URL}/releases/${versionPart}/BinDiff-${osPlatform}.zip`;
+  return `${BASE_URL}/releases/${versionPart}/${getZipName(osPlatform)}.zip`;
 }
 
 function exeName(name) {
@@ -106,6 +110,8 @@ async function download() {
   const extractPath = await tc.extractZip(downloadPath);
   core.debug(`extractPath: ${extractPath}`);
 
+  const bindiffPath = path.join(extractPath, getZipName(osPlatform));
+
   if (!process.env.RUNNER_TEMP)
     throw new Error('Environment variable RUNNER_TEMP is not set');
 
@@ -115,18 +121,18 @@ async function download() {
   core.info(`Installing to ${outputPath}`);
   const binDir = path.join(outputPath, 'bin');
   await io.mkdirP(binDir);
-  await io.mv(path.join(extractPath, exeName('bindiff')), binDir);
-  await io.mv(path.join(extractPath, 'tools', exeName('bindiff_config_setup')), binDir);
-  await io.mv(path.join(extractPath, 'tools', exeName('binexport2dump')), binDir);
+  await io.mv(path.join(bindiffPath, exeName('bindiff')), binDir);
+  await io.mv(path.join(bindiffPath, 'tools', exeName('bindiff_config_setup')), binDir);
+  await io.mv(path.join(bindiffPath, 'tools', exeName('binexport2dump')), binDir);
 
   const idaPluginDir = getPluginsDir(outputPath, 'IDA Pro');
   await io.mkdirP(idaPluginDir);
-  await io.mv(path.join(extractPath, 'ida', dllName('binexport12_ida')), idaPluginDir);
-  await io.mv(path.join(extractPath, 'ida', dllName('bindiff8_ida')), idaPluginDir);
+  await io.mv(path.join(bindiffPath, 'ida', dllName('binexport12_ida')), idaPluginDir);
+  await io.mv(path.join(bindiffPath, 'ida', dllName('bindiff8_ida')), idaPluginDir);
 
   const binjaPluginDir = getPluginsDir(outputPath, 'Binary Ninja');
   await io.mkdirP(binjaPluginDir);
-  await io.mv(path.join(extractPath, 'binaryninja', dllName('binexport12_binaryninja')), binjaPluginDir);
+  await io.mv(path.join(bindiffPath, 'binaryninja', dllName('binexport12_binaryninja')), binjaPluginDir);
 
   // mark as executable on linux
   if (osPlatform === 'linux') {
