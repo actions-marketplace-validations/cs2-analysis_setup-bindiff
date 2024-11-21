@@ -13,7 +13,7 @@ const TOOL_NAME = 'BinDiff';
 function getPlatform() {
   switch (os.platform()) {
     case 'win32':
-      return 'Linux';
+      return 'Windows';
     case 'linux':
       return 'Linux';
     default:
