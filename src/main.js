@@ -151,7 +151,7 @@ async function download() {
 }
 
 async function setup(installPath) {
-  core.info(`Setting up ${TOOL_NAME} config at ${configPath}`);
+  core.info(`Setting up ${TOOL_NAME}`);
 
   const configDir = getConfigDir();
   await io.mkdirP(configDir);
